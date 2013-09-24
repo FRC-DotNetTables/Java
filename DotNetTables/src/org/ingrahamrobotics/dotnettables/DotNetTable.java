@@ -69,6 +69,9 @@ public class DotNetTable implements ITableListener {
 
     public void setInterval(int update) throws IllegalStateException {
         this.throwIfNotWritable();
+        if (update <= 0) {
+            update = -1;
+        }
         this.updateInterval = update;
     }
 
