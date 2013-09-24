@@ -9,6 +9,7 @@ import java.util.Set;
 
 public class DotNetTable implements ITableListener {
 
+    public static final double STALE_FACTOR = 2.5;
     public static final String UPDATE_INTERVAL = "_UPDATE_INTERVAL";
     private String name;
     private int updateInterval;
@@ -16,13 +17,13 @@ public class DotNetTable implements ITableListener {
     public HashMap<String, String> data;
     private DotNetTableEvents changeCallback;
     private DotNetTableEvents staleCallback;
-    private double lastUpdate;
+    private long lastUpdate;
 
     public DotNetTable(String name, boolean writable) {
         this.lastUpdate = 0;
         this.name = name;
         this.writable = writable;
-        this.updateInterval = 500;
+        this.updateInterval = -1;
         this.changeCallback = null;
         this.staleCallback = null;
         data = new HashMap<String, String>();
@@ -30,6 +31,26 @@ public class DotNetTable implements ITableListener {
 
     public String name() {
         return this.name;
+    }
+
+    public boolean isStale() {
+        // Tables with no update interval are never stale
+        if (this.updateInterval <= 0) {
+            return false;
+        }
+
+        // Tables are stale when we miss STALE_FACTOR update intervals
+        double age = System.currentTimeMillis() - this.lastUpdate;
+        if (age > (this.updateInterval * STALE_FACTOR)) {
+            return true;
+        }
+
+        // Otherwise we're fresh
+        return false;
+    }
+
+    public double lastUpdate() {
+        return this.lastUpdate;
     }
 
     public boolean isWritable() {
@@ -56,6 +77,9 @@ public class DotNetTable implements ITableListener {
     }
 
     public void onStale(DotNetTableEvents callback) {
+        if (this.writable) {
+            throw new IllegalStateException("Table is local: " + this.name);
+        }
         this.staleCallback = callback;
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -75,6 +99,7 @@ public class DotNetTable implements ITableListener {
     public void set(String key, String value) throws IllegalStateException {
         this.throwIfNotWritable();
         data.put(key, value);
+        this.lastUpdate = System.currentTimeMillis();
     }
 
     public void set(String key, double value) throws IllegalStateException {
@@ -98,7 +123,7 @@ public class DotNetTable implements ITableListener {
         return Double.valueOf(data.get(key));
     }
 
-    public double getInt(String key) {
+    public int getInt(String key) {
         return Integer.valueOf(data.get(key));
     }
 
@@ -106,6 +131,11 @@ public class DotNetTable implements ITableListener {
         // Unpack the new data
         data = SAtoHM(value);
         this.lastUpdate = System.currentTimeMillis();
+
+        // Note the published update interval
+        if (this.exists(UPDATE_INTERVAL)) {
+            this.updateInterval = this.getInt(UPDATE_INTERVAL);
+        }
 
         // Dispatch our callback, if any
         if (changeCallback != null) {

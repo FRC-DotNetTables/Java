@@ -60,13 +60,6 @@ public class DotNetTables {
     }
 
     /**
-     * @return List of currently subscribed/published tables
-     */
-    protected static ArrayList<DotNetTable> tables() {
-        return tables;
-    }
-
-    /**
      * Find the specified table in the subscribed tables list, if it exists
      *
      * @param name The table to be found
