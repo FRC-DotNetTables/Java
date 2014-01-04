@@ -99,18 +99,18 @@ public class DotNetTable implements ITableListener {
         return data.containsKey(key);
     }
 
-    public void set(String key, String value) throws IllegalStateException {
+    public void setValue(String key, String value) throws IllegalStateException {
         this.throwIfNotWritable();
         data.put(key, value);
         this.lastUpdate = System.currentTimeMillis();
     }
 
-    public void set(String key, double value) throws IllegalStateException {
-        this.set(key, Double.toString(value));
+    public void setValue(String key, double value) throws IllegalStateException {
+        this.setValue(key, Double.toString(value));
     }
 
-    public void set(String key, int value) throws IllegalStateException {
-        this.set(key, Integer.toString(value));
+    public void setValue(String key, int value) throws IllegalStateException {
+        this.setValue(key, Integer.toString(value));
     }
 
     public void remove(String key) throws IllegalStateException {
@@ -118,7 +118,7 @@ public class DotNetTable implements ITableListener {
         data.remove(key);
     }
 
-    public String get(String key) {
+    public String getValue(String key) {
         return data.get(key);
     }
 
@@ -148,7 +148,7 @@ public class DotNetTable implements ITableListener {
 
     public void send() throws IllegalStateException {
         throwIfNotWritable();
-        set(UPDATE_INTERVAL, getInterval());
+        setValue(UPDATE_INTERVAL, getInterval());
         DotNetTables.push(name, HMtoSA(data));
 
         // Dispatch our callback, if any
