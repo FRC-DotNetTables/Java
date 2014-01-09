@@ -13,7 +13,7 @@ public class DotNetTables {
     private static boolean connected = false;
     private static ArrayList<DotNetTable> tables;
 
-    static private void init() throws IOException {
+    static private synchronized void init() throws IOException {
         tables = new ArrayList<DotNetTable>();
 
         // Attempt to init the underlying NetworkTable
@@ -101,7 +101,7 @@ public class DotNetTables {
      * @param name New or existing table name
      * @return The table to get/create
      */
-    private static DotNetTable getTable(String name, boolean writable) {
+    private static synchronized DotNetTable getTable(String name, boolean writable) {
         DotNetTable table;
         try {
             table = findTable(name);
@@ -131,7 +131,7 @@ public class DotNetTables {
      *
      * @param name The table to remove
      */
-    public static void drop(String name) {
+    public static synchronized void drop(String name) {
         try {
             DotNetTable table = findTable(name);
             nt_table.removeTableListener(table);
@@ -147,10 +147,15 @@ public class DotNetTables {
      * @param name DotNetTable name
      * @param data StringArray-packed DotNetTable data
      */
-    protected static void push(String name, Object data) {
+    protected static synchronized void push(String name, Object data) {
         if (!isConnected()) {
             throw new IllegalStateException("NetworkTable not initalized");
         }
-        nt_table.putValue(name, data);
+        try {
+            findTable(name);
+            nt_table.putValue(name, data);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalStateException(ex.toString());
+        }
     }
 }
