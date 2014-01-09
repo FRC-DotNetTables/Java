@@ -114,7 +114,6 @@ public class DotNetTables {
                 table.send();
             } else {
                 nt_table.addTableListener(table);
-
             }
         }
 
@@ -151,11 +150,15 @@ public class DotNetTables {
         if (!isConnected()) {
             throw new IllegalStateException("NetworkTable not initalized");
         }
+        DotNetTable table;
         try {
-            findTable(name);
-            nt_table.putValue(name, data);
+            table = findTable(name);
         } catch (IllegalArgumentException ex) {
             throw new IllegalStateException(ex.toString());
         }
+        if (!table.isWritable()) {
+            throw new IllegalStateException("Table not writable: " + name);
+        }
+        nt_table.putValue(name, data);
     }
 }
