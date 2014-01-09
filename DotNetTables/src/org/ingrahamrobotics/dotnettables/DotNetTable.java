@@ -3,9 +3,9 @@ package org.ingrahamrobotics.dotnettables;
 import edu.wpi.first.wpilibj.networktables2.type.StringArray;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DotNetTable implements ITableListener {
 
@@ -14,7 +14,7 @@ public class DotNetTable implements ITableListener {
     private String name;
     private int updateInterval;
     private boolean writable;
-    public HashMap<String, String> data;
+    public ConcurrentHashMap<String, String> data;
     private DotNetTableEvents changeCallback;
     private DotNetTableEvents staleCallback;
     private long lastUpdate;
@@ -26,7 +26,7 @@ public class DotNetTable implements ITableListener {
         this.updateInterval = -1;
         this.changeCallback = null;
         this.staleCallback = null;
-        data = new HashMap<String, String>();
+        data = new ConcurrentHashMap<String, String>();
     }
 
     public String name() {
@@ -157,7 +157,7 @@ public class DotNetTable implements ITableListener {
         }
     }
 
-    private StringArray HMtoSA(HashMap<String, String> data) {
+    private StringArray HMtoSA(ConcurrentHashMap<String, String> data) {
         StringArray out = new StringArray();
         for (Iterator<String> it = data.keySet().iterator(); it.hasNext();) {
             String key = it.next();
@@ -172,8 +172,9 @@ public class DotNetTable implements ITableListener {
         return out;
     }
 
-    private HashMap<String, String> SAtoHM(StringArray data) throws ArrayIndexOutOfBoundsException {
-        HashMap<String, String> out = new HashMap<String, String>();
+    private ConcurrentHashMap<String, String> SAtoHM(StringArray data) throws ArrayIndexOutOfBoundsException {
+        ConcurrentHashMap<String, String> out;
+        out = new ConcurrentHashMap<String, String>();
         if (data.size() % 2 != 0) {
             throw new ArrayIndexOutOfBoundsException("StringArray contains an odd number of elements");
         }
