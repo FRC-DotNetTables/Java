@@ -42,7 +42,7 @@ public class Client implements DotNetTableEvents {
             if (i % 10 == 0) {
                 client.clear();
             }
-            client.set("ClientKey-" + i, "ClientVal-" + i);
+            client.setValue("ClientKey-" + i, "ClientVal-" + i);
             client.send();
             i++;
         }
@@ -52,7 +52,7 @@ public class Client implements DotNetTableEvents {
     public void changed(DotNetTable table) {
         for (Iterator<String> it = table.keys().iterator(); it.hasNext();) {
             String key = it.next();
-            System.out.println(key + " => " + table.get(key));
+            System.out.println(key + " => " + table.getValue(key));
         }
         System.out.println();
     }
