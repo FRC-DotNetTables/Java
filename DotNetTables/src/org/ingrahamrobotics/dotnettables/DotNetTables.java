@@ -4,9 +4,21 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * A wrapper for FRC NetworkTables that provides enforced directionality, a
+ * unified view of subscribed and published tables, and periodic updates and
+ * staleness detection
+ *
+ * This project also exposes all of the underlying NetworkTables classes,
+ * methods, and data types, for easy inclusion in both Java and .NET projects
+ *
+ * @author FRC Team 4030
+ */
 public class DotNetTables {
 
-    // The table name used for the underlying NetworkTable
+    /**
+     * The table name used for the underlying NetworkTable
+     */
     public static final String TABLE_NAME = "DotNet";
     private static NetworkTable nt_table;
     private static boolean client = false;
@@ -30,10 +42,31 @@ public class DotNetTables {
         }
     }
 
+    /**
+     * Initialize a NetworkTables server. In standard FRC usage this is done on
+     * the robot. A server can both publish and subscribe to tables; server vs.
+     * client mode only controls whether the process listens for inbound network
+     * connections.
+     *
+     * @throws IOException Thrown if the underlying network bind() operations
+     * fail
+     */
     static public void startServer() throws IOException {
         init();
     }
 
+    /**
+     * Initialize a NetworkTables client. In standard FRC usage this is done on
+     * the driver's station or other remote computers. A client and both publish
+     * and subscribe to tables; server vs. client mode only controls whether the
+     * process listens for inbound network connections.
+     *
+     * @param IP The IP address of the NetworkTables server. If using standard
+     * FRC IP addresses, you may provide your team number instead of the IP
+     * address.
+     * @throws IOException Thrown if the underlying network bind() operations
+     * fail
+     */
     static public void startClient(String IP) throws IOException {
         NetworkTable.setClientMode();
         if (IP.matches("^\\d{4}$")) {
@@ -49,14 +82,16 @@ public class DotNetTables {
     }
 
     /**
-     * @return True if this device is configured as a NetworkTable subscriber
+     * @return True if this device is configured as a NetworkTables client,
+     * false if configured as a server
      */
     public static boolean isClient() {
         return client;
     }
 
     /**
-     * @return True if the connection has been successfully initialized
+     * @return True if the NetworkTables connection has been successfully
+     * initialized
      */
     public static boolean isConnected() {
         return connected;
