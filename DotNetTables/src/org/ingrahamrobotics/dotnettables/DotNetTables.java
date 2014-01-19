@@ -12,7 +12,7 @@ public class DotNetTables {
     private static boolean client = false;
     private static boolean connected = false;
     private static ArrayList<DotNetTable> tables;
-    private static final Object syncLock = null;
+    private static final Object syncLock = new Object();
 
     static private void init() throws IOException {
         synchronized (syncLock) {
