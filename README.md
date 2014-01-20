@@ -7,7 +7,7 @@ DotNetTables is an extention of the NetworkTables interface provided by FRC:
 The goal of this project is two-fold:
 
 1. To provide an easy-to-integrate .NET conversion of NetworkTables, for use in non-Java driver station interfaces
-2. To provide enforced directionality and other wrapper functions to more strictly manage the use of NetworkTables
+2. To provide enforced directionality and other wrapper functionality to more strictly manage the use of NetworkTables
 
 While our team uses the DotNetTables wrapper classes, this project is intended to provide complete access to the underlying NetworkTables implementation, if you prefer the interface that provides. Both the Java and .NET projects expose all classes, methods, and data types provided by the NetworkTables API.
 
