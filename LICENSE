@@ -1,3 +1,18 @@
+=========================
+FRC Network Tables
+=========================
+
+Compiled code from FRC Network Tables project is distributed as part of this project. I cannot find any explict license 
+terms for that project, but I've been assured by Brad Miller, listed author for the FRC NetworkTables project, that "The 
+license should allow use of the source code for any purpose."
+
+If someone disagrees and would prefer that project is not redistrubted here, please let me know. <zach@kotlarek.com>
+
+
+=========================
+DotNetTables
+=========================
+
 GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
 
