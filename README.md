@@ -23,4 +23,6 @@ If you have questions feel free to mail:
 Java Implementation
 -------------------
 
-In the "dist" folder you'll find DotNetTables.jar and DotNetTables-combined.jar. They both contain the classes from this project, and the *-combined version also contains the classes from FRC NetworkTables desktop implementation. So if you are already including the FRC-provided networktables-desktop.jar library in your project you should use DotNetTables.jar, otherwise you want the DotNetTables-combined.jar library.
+In the dist(dist/) folder you'll find DotNetTables.jar(dist/DotNetTables.jar) and DotNetTables-combined.jar(dist/DotNettables-combined.jar).
+
+Both archives contain the classes from this project, and the *-combined version also contains the classes from FRC NetworkTables desktop implementation. So if you are already including the FRC-provided networktables-desktop.jar library in your project you should use DotNetTables.jar, otherwise you want the DotNetTables-combined.jar library.
