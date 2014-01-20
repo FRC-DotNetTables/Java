@@ -1,7 +1,5 @@
 DotNetTables
 ============
-Java Implementation
--------------------
 
 DotNetTables is an extention of the NetworkTables interface provided by FRC:
 	http://firstforge.wpi.edu/sf/projects/network_tables_2_0
@@ -21,7 +19,7 @@ The corresponding .NET project is available here:
 If you have questions feel free to mail:
 	zach@kotlarek.com
 
-Usage
------
+Java Implementation
+-------------------
 
 In the "dist" folder you'll find DotNetTables.jar and DotNetTables-combined.jar. They both contain the classes from this project, and the *-combined version also contains the classes from FRC NetworkTables desktop implementation. So if you are already including the FRC-provided networktables-desktop.jar library in your project you should use DotNetTables.jar, otherwise you want the DotNetTables-combined.jar library.
