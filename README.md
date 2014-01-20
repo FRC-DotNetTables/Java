@@ -5,6 +5,7 @@ DotNetTables is an extention of the NetworkTables interface provided by FRC:
 	http://firstforge.wpi.edu/sf/projects/network_tables_2_0
 
 The goal of this project is two-fold:
+
 1. To provide an easy-to-integrate .NET conversion of NetworkTables, for use in non-Java driver station interfaces
 2. To provide enforced directionality and other wrapper functions to more strictly manage the use of NetworkTables
 
