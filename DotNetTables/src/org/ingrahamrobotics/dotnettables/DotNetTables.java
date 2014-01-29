@@ -2,7 +2,9 @@ package org.ingrahamrobotics.dotnettables;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import java.io.IOException;
-import java.util.ArrayList;
+// I'm aware this is obsolete, but it's also compatible with the cRIO's squawk JVM
+import java.util.Hashtable;
+import java.util.Enumeration;
 
 /**
  * A wrapper for FRC NetworkTables that provides enforced directionality, a
@@ -23,12 +25,12 @@ public class DotNetTables {
     private static NetworkTable nt_table;
     private static boolean client = false;
     private static boolean connected = false;
-    private static ArrayList<DotNetTable> tables;
+    private static Hashtable tables;
     private static final Object syncLock = new Object();
 
     static private void init() throws IOException {
         synchronized (syncLock) {
-            tables = new ArrayList<DotNetTable>();
+            tables = new Hashtable();
 
             // Attempt to init the underlying NetworkTable
             try {
@@ -69,14 +71,29 @@ public class DotNetTables {
      */
     static public void startClient(String IP) throws IOException {
         NetworkTable.setClientMode();
-        if (IP.matches("^\\d{4}$")) {
-            NetworkTable.setTeam(Integer.valueOf(IP));
-        } else if (IP.matches("^(?:\\d{1,3}.){3}\\d{1,3}$")) {
-            NetworkTable.setIPAddress(IP);
-        } else {
-            throw new IllegalArgumentException("Invalid IP address or team number: " + IP);
+
+        boolean ipSet = false;
+
+        // If the input parses as a interger, assume it's a team number
+        try {
+            NetworkTable.setTeam(Integer.parseInt(IP));
+            ipSet = true;
+        } catch (NumberFormatException ex) {
         }
 
+        // This is not a complete check for a vald IP address, but we don't have regex and it's not worth much work
+        if (!ipSet) {
+            int i = IP.indexOf('.');
+            if (i > 0 && i < 4 && IP.length() >= 7) {
+                NetworkTable.setIPAddress(IP);
+                ipSet = false;
+            }
+        }
+
+        if (!ipSet) {
+            throw new IllegalArgumentException("Invalid IP address or team number: " + IP);
+        }
+        
         client = true;
         init();
     }
@@ -104,9 +121,10 @@ public class DotNetTables {
      * @return The specified table, if available. NULL if no such table exists.
      */
     private static DotNetTable findTable(String name) throws IllegalArgumentException {
-        for (DotNetTable table : tables) {
-            if (table.name().equals(name)) {
-                return table;
+        for (Enumeration it = tables.keys(); it.hasMoreElements();) {
+            String tableName = (String) it.nextElement();
+            if (tableName.equals(name)) {
+                return (DotNetTable) tables.get(tableName);
             }
         }
         throw new IllegalArgumentException("No such table: " + name);
@@ -146,7 +164,7 @@ public class DotNetTables {
                 table = findTable(name);
             } catch (IllegalArgumentException ex) {
                 table = new DotNetTable(name, writable);
-                tables.add(table);
+                tables.put(table.name(), table);
 
                 // Publish or subscribe the new table
                 if (writable) {

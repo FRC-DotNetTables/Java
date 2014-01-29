@@ -3,9 +3,8 @@ package org.ingrahamrobotics.dotnettables;
 import edu.wpi.first.wpilibj.networktables2.type.StringArray;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * A named and published or subscribed DotNetTable. DotNetTables provide
@@ -39,7 +38,7 @@ public class DotNetTable implements ITableListener {
      * StringArray when published to the network (or from a StringArray when
      * received from the network)
      */
-    public ConcurrentHashMap<String, String> data;
+    public Hashtable data;
     private DotNetTableEvents changeCallback;
     private DotNetTableEvents staleCallback;
     private long lastUpdate;
@@ -57,7 +56,7 @@ public class DotNetTable implements ITableListener {
         this.updateInterval = -1;
         this.changeCallback = null;
         this.staleCallback = null;
-        data = new ConcurrentHashMap<String, String>();
+        data = new Hashtable();
     }
 
     /**
@@ -158,7 +157,7 @@ public class DotNetTable implements ITableListener {
             throw new IllegalStateException("Table is local: " + this.name);
         }
         this.staleCallback = callback;
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new IllegalStateException("Not supported yet.");
     }
 
     /**
@@ -171,8 +170,8 @@ public class DotNetTable implements ITableListener {
     /**
      * @return A set of all keys in this table
      */
-    public Set<String> keys() {
-        return data.keySet();
+    public Enumeration keys() {
+        return data.keys();
     }
 
     /**
@@ -239,7 +238,7 @@ public class DotNetTable implements ITableListener {
      * @return The related value
      */
     public String getValue(String key) {
-        return data.get(key);
+        return (String) data.get(key);
     }
 
     /**
@@ -247,7 +246,7 @@ public class DotNetTable implements ITableListener {
      * @return The related value
      */
     public double getDouble(String key) {
-        return Double.valueOf(data.get(key));
+        return Double.parseDouble(getValue(key));
     }
 
     /**
@@ -255,7 +254,7 @@ public class DotNetTable implements ITableListener {
      * @return The related value
      */
     public int getInt(String key) {
-        return Integer.valueOf(data.get(key));
+        return Integer.parseInt(getValue(key));
     }
 
     private void recv(StringArray value) {
@@ -291,24 +290,24 @@ public class DotNetTable implements ITableListener {
         }
     }
 
-    private StringArray HMtoSA(ConcurrentHashMap<String, String> data) {
+    private StringArray HMtoSA(Hashtable data) {
         StringArray out = new StringArray();
-        for (Iterator<String> it = data.keySet().iterator(); it.hasNext();) {
-            String key = it.next();
+        for (Enumeration it = data.keys(); it.hasMoreElements();) {
+            String key = (String) it.nextElement();
             out.add(key);
         }
 
         /*Use the output list of keys as the iterator to ensure correct value ordering*/
         int size = out.size();
         for (int i = 0; i < size; i++) {
-            out.add(data.get(out.get(i)));
+            out.add((String) data.get(out.get(i)));
         }
         return out;
     }
 
-    private ConcurrentHashMap<String, String> SAtoHM(StringArray data) throws ArrayIndexOutOfBoundsException {
-        ConcurrentHashMap<String, String> out;
-        out = new ConcurrentHashMap<String, String>();
+    private Hashtable SAtoHM(StringArray data) throws ArrayIndexOutOfBoundsException {
+        Hashtable out;
+        out = new Hashtable();
         if (data.size() % 2 != 0) {
             throw new ArrayIndexOutOfBoundsException("StringArray contains an odd number of elements");
         }
@@ -327,7 +326,7 @@ public class DotNetTable implements ITableListener {
      * @param val The new or updated array
      * @param isNew True if the array did not previous exist
      */
-    @Override
+    // In newer java we would annote with @Override, but not for the cRIO
     public void valueChanged(ITable itable, String key, Object val, boolean isNew) {
         // Skip updates for other tables
         if (!this.name.equals(key)) {
