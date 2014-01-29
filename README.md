@@ -9,7 +9,7 @@ The goal of this project is two-fold:
 1. To provide an easy-to-integrate .NET conversion of NetworkTables, for use in non-Java driver station interfaces
 2. To provide enforced directionality and other wrapper functionality to more strictly manage the use of NetworkTables
 
-While our team prefer the functionality of the DotNetTables API, this project is intended to provide complete access to the underlying NetworkTables implementation, if you prefer its API. Both the Java and .NET projects expose all classes, methods, and data types provided by the NetworkTables API.
+While our team prefers the functionality of the DotNetTables API, this project is intended to provide complete access to the underlying NetworkTables implementation, if you prefer its API. Both the Java and .NET projects expose all classes, methods, and data types provided by the NetworkTables API.
 
 The DotNetTables API is documented here:
 	http://frc-dotnettables.github.io/Java/
