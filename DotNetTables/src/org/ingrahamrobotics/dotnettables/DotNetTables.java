@@ -86,14 +86,14 @@ public class DotNetTables {
             int i = IP.indexOf('.');
             if (i > 0 && i < 4 && IP.length() >= 7) {
                 NetworkTable.setIPAddress(IP);
-                ipSet = false;
+                ipSet = true;
             }
         }
 
         if (!ipSet) {
             throw new IllegalArgumentException("Invalid IP address or team number: " + IP);
         }
-        
+
         client = true;
         init();
     }
