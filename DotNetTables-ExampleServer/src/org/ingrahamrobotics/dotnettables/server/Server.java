@@ -1,7 +1,7 @@
 package org.ingrahamrobotics.dotnettables.server;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ingrahamrobotics.dotnettables.DotNetTable;
@@ -50,8 +50,9 @@ public class Server implements DotNetTableEvents {
 
     @Override
     public void changed(DotNetTable table) {
-        for (Iterator<String> it = table.keys().iterator(); it.hasNext();) {
-            String key = it.next();
+        String key;
+        for (Enumeration it = table.keys(); it.hasMoreElements();) {
+            key = (String) it.nextElement();
             System.out.println(key + " => " + table.getValue(key));
         }
         System.out.println();
