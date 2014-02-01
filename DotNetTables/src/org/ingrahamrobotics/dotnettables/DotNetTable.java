@@ -265,7 +265,7 @@ public class DotNetTable implements ITableListener {
         // Note the published update interval
         if (this.exists(UPDATE_INTERVAL)) {
             this.updateInterval = this.getInt(UPDATE_INTERVAL);
-            this.remove(UPDATE_INTERVAL);
+            data.remove(UPDATE_INTERVAL);
         }
 
         // Dispatch our callback, if any
