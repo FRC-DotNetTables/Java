@@ -137,8 +137,11 @@ public class DotNetTables {
      *
      * @param name Name of the table to subscribe
      * @return The subscribed table
+     * @throws IllegalStateException Thrown if the named table exists but does
+     * not match the requested writable state -- for example, if a table is
+     * already being published and is requested for subscription, or visa versa.
      */
-    public static DotNetTable subscribe(String name) {
+    public static DotNetTable subscribe(String name) throws IllegalStateException {
         return getTable(name, false);
     }
 
@@ -147,8 +150,11 @@ public class DotNetTables {
      *
      * @param name Name of the table to publish
      * @return The published table
+     * @throws IllegalStateException Thrown if the named table exists but does
+     * not match the requested writable state -- for example, if a table is
+     * already being published and is requested for subscription, or visa versa.
      */
-    public static DotNetTable publish(String name) {
+    public static DotNetTable publish(String name) throws IllegalStateException {
         return getTable(name, true);
     }
 
@@ -161,7 +167,7 @@ public class DotNetTables {
      * not match the requested writable state -- for example, if a table is
      * already being published and is requested for subscription, or visa versa.
      */
-    private static DotNetTable getTable(String name, boolean writable) {
+    private static DotNetTable getTable(String name, boolean writable) throws IllegalStateException {
         synchronized (syncLock) {
             DotNetTable table;
             try {
