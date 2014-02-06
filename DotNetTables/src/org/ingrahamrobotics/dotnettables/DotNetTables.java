@@ -141,7 +141,7 @@ public class DotNetTables {
      * not match the requested writable state -- for example, if a table is
      * already being published and is requested for subscription, or visa versa.
      */
-    public static DotNetTable subscribe(String name) throws IllegalStateException {
+    public static DotNetTable subscribe(String name) {
         return getTable(name, false);
     }
 
@@ -154,7 +154,7 @@ public class DotNetTables {
      * not match the requested writable state -- for example, if a table is
      * already being published and is requested for subscription, or visa versa.
      */
-    public static DotNetTable publish(String name) throws IllegalStateException {
+    public static DotNetTable publish(String name) {
         return getTable(name, true);
     }
 
