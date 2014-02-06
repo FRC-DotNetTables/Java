@@ -117,8 +117,9 @@ public class DotNetTables {
     /**
      * Find the specified table in the subscribed tables list, if it exists
      *
-     * @param name The table to be found
-     * @return The specified table, if available. NULL if no such table exists.
+     * @param name The name table to be found.
+     * @return The specified table.
+     * @throws IllegalArgumentException If the named table does not exist.
      */
     private static DotNetTable findTable(String name) throws IllegalArgumentException {
         for (Enumeration it = tables.keys(); it.hasMoreElements();) {
@@ -152,10 +153,13 @@ public class DotNetTables {
     }
 
     /**
-     * Get a table, creating and subscribing/publishing as necessary
+     * Get a table, creating and subscribing/publishing as necessary.
      *
      * @param name New or existing table name
-     * @return The table to get/create
+     * @return The table to get or create
+     * @throws IllegalStateException Thrown if the named table exists but does
+     * not match the requested writable state -- for example, if a table is
+     * already being published and is requested for subscription, or visa versa.
      */
     private static DotNetTable getTable(String name, boolean writable) {
         synchronized (syncLock) {
@@ -163,6 +167,7 @@ public class DotNetTables {
             try {
                 table = findTable(name);
             } catch (IllegalArgumentException ex) {
+                // TODO: Check that other instances aren't already publishing the requested writable table
                 table = new DotNetTable(name, writable);
                 tables.put(table.name(), table);
 
