@@ -38,11 +38,8 @@ public class Client implements DotNetTableEvents {
             } catch (InterruptedException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-            if (i % 10 == 0) {
-                client.clear();
-            }
-            client.setValue("ClientKey-" + i, "ClientVal-" + i);
+            
+            client.setValue("ClientKey-" + (i % 10), "ClientVal-" + i);
             client.send();
             i++;
         }
