@@ -29,6 +29,10 @@ public class Server implements DotNetTableEvents {
         
         // Register for updates from the subscribed table
         client.onChange(this);
+        client.onStale(this);
+        
+        // Set an update intervale for our published table
+        server.setInterval(5);
 
         // Put new data into our published table every second
         int i = 0;
@@ -43,7 +47,6 @@ public class Server implements DotNetTableEvents {
                 server.clear();
             }
             server.setValue("ServerKey-" + i, "ServerVal-" + i);
-            server.send();
             i++;
         }
     }
@@ -60,6 +63,6 @@ public class Server implements DotNetTableEvents {
 
     @Override
     public void stale(DotNetTable table) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        System.out.print("\nTable expired: " + table.name() + "\n\n");
     }
 }
