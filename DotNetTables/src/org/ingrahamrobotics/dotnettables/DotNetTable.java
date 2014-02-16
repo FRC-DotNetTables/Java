@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * A named and published or subscribed DotNetTable. DotNetTables provide
@@ -25,7 +27,7 @@ public class DotNetTable implements ITableListener {
      * update intervals may exceed the specified interval by this factor before
      * being declared "stale".
      */
-    public static final double STALE_FACTOR = 2.5;
+    public static final double STALE_FACTOR = 2.1;
     /**
      * The reserved key name used to publish the update interval to subscribers.
      */
@@ -33,6 +35,7 @@ public class DotNetTable implements ITableListener {
     private String name;
     private int updateInterval;
     private boolean writable;
+    private Timer timer;
     /**
      * The underlying local data store for this table. This is converted to a
      * StringArray when published to the network (or from a StringArray when
@@ -56,7 +59,8 @@ public class DotNetTable implements ITableListener {
         this.updateInterval = -1;
         this.changeCallback = null;
         this.staleCallback = null;
-        data = new Hashtable();
+        this.data = new Hashtable();
+        this.timer = null;
     }
 
     /**
@@ -107,6 +111,37 @@ public class DotNetTable implements ITableListener {
         }
     }
 
+    private class DotNetTableTimer extends TimerTask {
+
+        private DotNetTable table;
+
+        public DotNetTableTimer(DotNetTable table) {
+            this.table = table;
+        }
+
+        // In newer java we would annote with @Override, but not for the cRIO
+        public void run() {
+            if (table.isWritable()) {
+                table.send();
+            } else {
+                if (table.staleCallback != null) {
+                    table.staleCallback.stale(table);
+                }
+            }
+        }
+    }
+
+    private void resetTimer() {
+        if (this.timer != null) {
+            this.timer.cancel();
+        }
+        if (this.updateInterval >= 0) {
+            this.timer = new Timer();
+            TimerTask timerTask = new DotNetTable.DotNetTableTimer(this);
+            this.timer.schedule(timerTask, this.updateInterval * 1000);
+        }
+    }
+
     /**
      * @return The expected update interval for this table, in seconds
      */
@@ -131,6 +166,7 @@ public class DotNetTable implements ITableListener {
             update = -1;
         }
         this.updateInterval = update;
+        this.resetTimer();
     }
 
     /**
@@ -157,7 +193,6 @@ public class DotNetTable implements ITableListener {
             throw new IllegalStateException("Table is local: " + this.name);
         }
         this.staleCallback = callback;
-        throw new IllegalStateException("Not supported yet.");
     }
 
     /**
@@ -266,6 +301,7 @@ public class DotNetTable implements ITableListener {
         if (this.exists(UPDATE_INTERVAL)) {
             this.updateInterval = this.getInt(UPDATE_INTERVAL);
             data.remove(UPDATE_INTERVAL);
+            this.resetTimer();
         }
 
         // Dispatch our callback, if any
@@ -284,6 +320,7 @@ public class DotNetTable implements ITableListener {
         throwIfNotWritable();
         setValue(UPDATE_INTERVAL, getInterval());
         DotNetTables.push(name, HMtoSA(data));
+        this.resetTimer();
 
         // Dispatch our callback, if any
         if (changeCallback != null) {
