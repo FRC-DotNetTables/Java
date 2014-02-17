@@ -138,7 +138,7 @@ public class DotNetTable implements ITableListener {
         if (this.updateInterval >= 0) {
             this.timer = new Timer();
             TimerTask timerTask = new DotNetTable.DotNetTableTimer(this);
-            this.timer.schedule(timerTask, this.updateInterval * 1000);
+            this.timer.schedule(timerTask, this.updateInterval);
         }
     }
 
@@ -152,9 +152,10 @@ public class DotNetTable implements ITableListener {
     /**
      * Set the expected update interval for this table. This interval controls
      * what is considered "stale" by any subscribers, and sets the maximum time
-     * between network sends(). Only published tables may set their update
-     * interval; subscribers are informed of the interval and calculate their
-     * "stale" indicator based on expectations set by the publisher.
+     * between network sends() in milliseconds. Only published tables may set
+     * their update interval; subscribers are informed of the interval and
+     * calculate their "stale" indicator based on expectations set by the
+     * publisher.
      *
      * @param update The desired update interval, in seconds
      * @throws IllegalStateException Thrown if this table is not writable (i.e.
