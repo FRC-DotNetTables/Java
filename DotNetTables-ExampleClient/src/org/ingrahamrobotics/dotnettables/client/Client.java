@@ -32,7 +32,7 @@ public class Client implements DotNetTableEvents {
         server.onStale(this);
         
         // Set an update intervale for our published table
-        client.setInterval(5);
+        client.setInterval(5000);
         
         // Put new data into our published table every second
         int i = 0;
