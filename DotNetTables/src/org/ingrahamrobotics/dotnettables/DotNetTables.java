@@ -28,10 +28,6 @@ public class DotNetTables {
     private static Hashtable tables;
     private static final Object syncLock = new Object();
 
-    static private void init() throws IOException {
-        init(false);
-    }
-    
     static private void init(boolean isRunning) throws IOException {
         synchronized (syncLock) {
             tables = new Hashtable();
@@ -60,9 +56,14 @@ public class DotNetTables {
      * fail
      */
     static public void startServer() throws IOException {
-        init();
+        init(false);
     }
-    
+
+    /**
+     * Initialize a NetworkTables server from inside the cRIO Java framework.
+     * The cRIO typically initializes the server automatically at boot; this
+     * method uses that existing server.
+     */
     static public void startCRIO() {
         try {
             init(true);
