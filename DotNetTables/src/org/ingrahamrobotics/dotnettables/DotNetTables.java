@@ -5,8 +5,6 @@ import java.io.IOException;
 // I'm aware this is obsolete, but it's also compatible with the cRIO's squawk JVM
 import java.util.Hashtable;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A wrapper for FRC NetworkTables that provides enforced directionality, a
@@ -70,7 +68,6 @@ public class DotNetTables {
             init(true);
         } catch (IOException ex) {
             // This should never happen -- we do not init on the cRIO
-            Logger.getLogger(DotNetTables.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
