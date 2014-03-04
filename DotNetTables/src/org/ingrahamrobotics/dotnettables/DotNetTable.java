@@ -138,7 +138,11 @@ public class DotNetTable implements ITableListener {
         if (this.updateInterval >= 0) {
             this.timer = new Timer();
             TimerTask timerTask = new DotNetTable.DotNetTableTimer(this);
-            this.timer.schedule(timerTask, this.updateInterval);
+            long delay = this.updateInterval;
+            if (!this.isWritable()) {
+                delay *= STALE_FACTOR;
+            }
+            this.timer.schedule(timerTask, delay);
         }
     }
 
