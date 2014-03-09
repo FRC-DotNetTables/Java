@@ -47,6 +47,8 @@ public class DotNetTable implements ITableListener {
     private DotNetTableEvents changeCallback;
     private DotNetTableEvents staleCallback;
     private long lastUpdate;
+    private boolean bumpState = false;
+    private static final Object syncLock = new Object();
 
     /**
      * Create a new DotNetTable with the specified name and ro/rw designation.
@@ -206,14 +208,18 @@ public class DotNetTable implements ITableListener {
      * Clear all data from this table
      */
     public void clear() {
-        data.clear();
+        synchronized (syncLock) {
+            data.clear();
+        }
     }
 
     /**
      * @return A set of all keys in this table
      */
     public Enumeration keys() {
-        return data.keys();
+        synchronized (syncLock) {
+            return data.keys();
+        }
     }
 
     /**
@@ -221,7 +227,9 @@ public class DotNetTable implements ITableListener {
      * @return True if the key exists in the table, otherwise false
      */
     public boolean exists(String key) {
-        return data.containsKey(key);
+        synchronized (syncLock) {
+            return data.containsKey(key);
+        }
     }
 
     /**
@@ -240,7 +248,9 @@ public class DotNetTable implements ITableListener {
         if (value == null) {
             value = "";
         }
-        data.put(key, value);
+        synchronized (syncLock) {
+            data.put(key, value);
+        }
         this.lastUpdate = System.currentTimeMillis();
     }
 
@@ -278,7 +288,13 @@ public class DotNetTable implements ITableListener {
      */
     public void remove(String key) throws IllegalStateException {
         this.throwIfNotWritable();
-        data.remove(key);
+        _remove(key);
+    }
+    
+    private void _remove(String key) {
+        synchronized (syncLock) {
+            data.remove(key);
+        }
     }
 
     /**
@@ -289,7 +305,9 @@ public class DotNetTable implements ITableListener {
         if (key == null) {
             throw new NullPointerException("NULL keys are not supported");
         }
-        return (String) data.get(key);
+        synchronized (syncLock) {
+            return (String) data.get(key);
+        }
     }
 
     /**
@@ -309,19 +327,23 @@ public class DotNetTable implements ITableListener {
     }
 
     private void recv(StringArray value) {
-        // Unpack the new data
-        data = SAtoHM(value);
-        this.lastUpdate = System.currentTimeMillis();
+        synchronized (syncLock) {
+            // Unpack the new data
+            data = SAtoHM(value);
+            this.lastUpdate = System.currentTimeMillis();
 
-        // Note the published update interval
-        if (this.exists(UPDATE_INTERVAL)) {
-            this.updateInterval = this.getInt(UPDATE_INTERVAL);
-            data.remove(UPDATE_INTERVAL);
-            this.resetTimer();
+            // Note the published update interval
+            if (this.exists(UPDATE_INTERVAL)) {
+                this.updateInterval = this.getInt(UPDATE_INTERVAL);
+                _remove(UPDATE_INTERVAL);
+            }
+
+            // Drop the bump key (if it exists)
+            _remove(BUMP_KEY);
         }
 
-        // Drop the bump key (if it exists)
-        data.remove(BUMP_KEY);
+        // Always reset the timer
+        this.resetTimer();
 
         // Dispatch our callback, if any
         if (changeCallback != null) {
@@ -337,21 +359,33 @@ public class DotNetTable implements ITableListener {
      */
     public void send() throws IllegalStateException {
         throwIfNotWritable();
-        setValue(UPDATE_INTERVAL, getInterval());
 
-        /*
-         * The cRIO verion of NetworkTables seems not to actually update string
-         * arrays where the array size has not changed, even if the elements
-         * have. So help it along with a "bump key" they is added or deleted on
-         * each send.
-         */
-        if (exists(BUMP_KEY)) {
-            remove(BUMP_KEY);
-        } else {
-            setValue(BUMP_KEY, System.currentTimeMillis());
+        synchronized (syncLock) {
+            // Provide the update interval for subscribers
+            setValue(UPDATE_INTERVAL, getInterval());
+
+            /*
+             * The cRIO verion of NetworkTables seems not to actually update string
+             * arrays where the array size has not changed, even if the elements
+             * have. So help it along with a "bump key" they is added or deleted on
+             * each send.
+             */
+            bumpState = !bumpState;
+            if (bumpState) {
+                setValue(BUMP_KEY, System.currentTimeMillis());
+            } else {
+                _remove(BUMP_KEY);
+            }
+
+            // Send to network
+            DotNetTables.push(name, HMtoSA(data));
+            
+            // Don't keep our special keys in the table
+            _remove(UPDATE_INTERVAL);
+            _remove(BUMP_KEY);
         }
-        
-        DotNetTables.push(name, HMtoSA(data));
+
+        // Always reset the timer
         this.resetTimer();
 
         // Dispatch our callback, if any
