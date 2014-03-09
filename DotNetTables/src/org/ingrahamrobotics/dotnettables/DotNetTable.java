@@ -286,6 +286,9 @@ public class DotNetTable implements ITableListener {
      * @return The related value
      */
     public String getValue(String key) {
+        if (key == null) {
+            throw new NullPointerException("NULL keys are not supported");
+        }
         return (String) data.get(key);
     }
 
