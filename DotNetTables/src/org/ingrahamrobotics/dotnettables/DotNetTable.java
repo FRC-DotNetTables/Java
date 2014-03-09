@@ -20,6 +20,7 @@ import java.util.TimerTask;
  *
  * @author FRC Team 4030
  */
+@SuppressWarnings("UseOfObsoleteCollectionType")
 public class DotNetTable implements ITableListener {
 
     /**
@@ -324,6 +325,11 @@ public class DotNetTable implements ITableListener {
     public void send() throws IllegalStateException {
         throwIfNotWritable();
         setValue(UPDATE_INTERVAL, getInterval());
+        if (exists("_bump")) {
+            remove("_bump");
+        } else {
+            setValue("_bump", System.currentTimeMillis());
+        }
         DotNetTables.push(name, HMtoSA(data));
         this.resetTimer();
 
