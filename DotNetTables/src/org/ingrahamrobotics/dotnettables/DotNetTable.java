@@ -234,6 +234,12 @@ public class DotNetTable implements ITableListener {
      */
     public void setValue(String key, String value) throws IllegalStateException {
         this.throwIfNotWritable();
+        if (key == null) {
+            throw new NullPointerException("NULL keys are not supported");
+        }
+        if (value == null) {
+            value = "";
+        }
         data.put(key, value);
         this.lastUpdate = System.currentTimeMillis();
     }
