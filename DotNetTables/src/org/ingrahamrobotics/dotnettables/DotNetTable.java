@@ -33,6 +33,7 @@ public class DotNetTable implements ITableListener {
      * The reserved key name used to publish the update interval to subscribers.
      */
     public static final String UPDATE_INTERVAL = "_UPDATE_INTERVAL";
+    public static final String BUMP_KEY = "_bump";
     private String name;
     private int updateInterval;
     private boolean writable;
@@ -310,6 +311,9 @@ public class DotNetTable implements ITableListener {
             this.resetTimer();
         }
 
+        // Drop the bump key (if it exists)
+        data.remove(BUMP_KEY);
+
         // Dispatch our callback, if any
         if (changeCallback != null) {
             changeCallback.changed(this);
@@ -325,11 +329,19 @@ public class DotNetTable implements ITableListener {
     public void send() throws IllegalStateException {
         throwIfNotWritable();
         setValue(UPDATE_INTERVAL, getInterval());
-        if (exists("_bump")) {
-            remove("_bump");
+
+        /*
+         * The cRIO verion of NetworkTables seems not to actually update string
+         * arrays where the array size has not changed, even if the elements
+         * have. So help it along with a "bump key" they is added or deleted on
+         * each send.
+         */
+        if (exists(BUMP_KEY)) {
+            remove(BUMP_KEY);
         } else {
-            setValue("_bump", System.currentTimeMillis());
+            setValue(BUMP_KEY, System.currentTimeMillis());
         }
+        
         DotNetTables.push(name, HMtoSA(data));
         this.resetTimer();
 
